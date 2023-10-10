@@ -50,12 +50,44 @@ fn add_employee(map: &mut HashMap<String, Department>, pressed_x: &mut bool) {
 }
 
 fn list_of_employees(map: &mut HashMap<String, Department>, department: &str) {
+    let mut t: Vec<(String, String)> = Vec::new();
+
+    for (k, v) in map {
+        t.push((
+            k.clone(),
+            match v {
+                Department::Front(_) => "Front".to_string(),
+                Department::Back(_) => "Back".to_string(),
+            },
+        ));
+    }
+    t.sort();
+    println!("");
+    println!("------------------");
     match department {
-        "All Departments" => {}
-        "Front" => {}
-        "Back" => {}
+        "All Departments" => {
+            for (k, v) in t {
+                println!("> {} | {}", k, v);
+            }
+        }
+        "Front" => {
+            for (k, v) in t {
+                if v == "Front" {
+                    println!("> {} | {}", k, v);
+                }
+            }
+        }
+        "Back" => {
+            for (k, v) in t {
+                if v == "Back" {
+                    println!("> {} | {}", k, v);
+                }
+            }
+        }
         _ => {}
     }
+    println!("------------------");
+    println!("");
 }
 
 fn main() {
