@@ -6,7 +6,7 @@ enum Department {
     Back(String),
 }
 
-fn add_employee() -> Option<(String, Department)> {
+fn add_employee(map: &mut HashMap<String, Department>) {
     let mut pressed_x = false;
     while !pressed_x {
         println!("Enter a command: Add Sam to Back");
@@ -28,17 +28,17 @@ fn add_employee() -> Option<(String, Department)> {
                         continue;
                     }
                 }
-                pressed_x = true;
-                return Some((name, department));
+                map.insert(name, department);
+                action.clear();
+                input.clear();
+                break;
             }
             Err(_) => {
                 println!("Something went wrong reading the input");
-
                 continue;
             }
         };
     }
-    None
 }
 
 fn main() {
@@ -46,7 +46,7 @@ fn main() {
     map.insert("Lucas".to_string(), Department::Front("Front".to_string()));
     map.insert("Dan".to_string(), Department::Front("Back".to_string()));
     map.insert("Mark".to_string(), Department::Front("Front".to_string()));
-
-    map.insert()add_employee();
-    println!("{}", map.len());
+    println!("Map length before {}", map.len());
+    add_employee(&mut map);
+    println!("Map length after {}", map.len());
 }
