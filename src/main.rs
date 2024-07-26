@@ -1,108 +1,56 @@
-use std::collections::HashMap;
+use chrono::NaiveDate;
+use std::fmt;
 use std::io::stdin;
-
 enum Department {
-    Front(String),
-    Back(String),
+    Front,
+    Back,
 }
 
-fn add_employee(map: &mut HashMap<String, Department>, pressed_x: &mut bool) {
-    while !*pressed_x {
-        println!("Enter a command: Add Sam to Back");
-        let mut input = String::new();
-        let mut action = String::new();
-        let mut name = String::new();
-        let department: Department;
-        match stdin().read_line(&mut input) {
-            Ok(_) => {
-                println!("Your input was {}", &input);
-                let vect: Vec<&str> = input.split_whitespace().collect();
-                action = vect[0].to_string();
-                name = vect[1].to_string();
-                match vect[3] {
-                    "Front" => department = Department::Front("Front".to_string()),
-                    "Back" => department = Department::Back("Back".to_string()),
-                    _ => {
-                        println!("Not a department: {}", vect[3]);
-                        continue;
-                    }
-                }
-
-                println!(
-                    "Successfully added {} to department {}",
-                    &name,
-                    match department {
-                        Department::Front(ref department) => department,
-                        Department::Back(ref department) => department,
-                    }
-                );
-                map.insert(name, department);
-                action.clear();
-                input.clear();
-                break;
-            }
-            Err(_) => {
-                println!("Something went wrong reading the input");
-                continue;
-            }
-        };
+impl fmt::Display for Department {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Department::Front => write!(f, "Front"),
+            Department::Back => write!(f, "Back"),
+        }
     }
 }
 
-fn list_of_employees(map: &mut HashMap<String, Department>, department: &str) {
-    let mut t: Vec<(String, String)> = Vec::new();
-
-    for (k, v) in map {
-        t.push((
-            k.clone(),
-            match v {
-                Department::Front(_) => "Front".to_string(),
-                Department::Back(_) => "Back".to_string(),
-            },
-        ));
-    }
-    t.sort();
-    println!("");
-    println!("------------------");
-    match department {
-        "All Departments" => {
-            for (k, v) in t {
-                println!("> {} | {}", k, v);
-            }
-        }
-        "Front" => {
-            for (k, v) in t {
-                if v == "Front" {
-                    println!("> {} | {}", k, v);
-                }
-            }
-        }
-        "Back" => {
-            for (k, v) in t {
-                if v == "Back" {
-                    println!("> {} | {}", k, v);
-                }
-            }
-        }
-        _ => {}
-    }
-    println!("------------------");
-    println!("");
+struct Employee {
+    name: String,
+    department: Department,
+    salary: u16,
+    employment_date: NaiveDate,
 }
 
 fn main() {
     let mut pressed_x = false;
-    let mut map: HashMap<String, Department> = HashMap::new();
+    let mut employee_list: Vec<Employee> = Vec::new();
     let mut input = String::new();
 
-    map.insert("Lucas".to_string(), Department::Front("Front".to_string()));
-    map.insert("Dan".to_string(), Department::Front("Back".to_string()));
-    map.insert("Mark".to_string(), Department::Front("Front".to_string()));
-    println!("Map length before {}", map.len());
+    employee_list.push(Employee {
+        name: "Lucas".to_string(),
+        department: Department::Back,
+        salary: 2000,
+        employment_date: NaiveDate::from_ymd_opt(2022, 10, 5).unwrap(),
+    });
+    employee_list.push(Employee {
+        name: "Dan".to_string(),
+        department: Department::Front,
+        salary: 1200,
+        employment_date: NaiveDate::from_ymd_opt(2021, 6, 18).unwrap(),
+    });
+    employee_list.push(Employee {
+        name: "Mark".to_string(),
+        department: Department::Front,
+        salary: 1800,
+        employment_date: NaiveDate::from_ymd_opt(2022, 1, 31).unwrap(),
+    });
 
-    add_employee(&mut map, &mut pressed_x);
+    println!("Employees count before {}", employee_list.len());
+
+    //add_employee(&mut map, &mut pressed_x);
     while !pressed_x {
-        let enter_text = "\nEnter \n>'x' to exit, \n>'z' to show department employees and 
+        let enter_text = "\nEnter \n>'x' to exit, \n>'z' to show department employees 
 >'c' to add another employee \n>'Z' to show all employees";
         println!("{}", &enter_text);
         input.clear();
@@ -113,7 +61,7 @@ fn main() {
                     break;
                 }
                 "Z" => {
-                    list_of_employees(&mut map, "All Departments");
+                    list_of_employees(&employee_list, "All Departments");
                 }
                 "z" => loop {
                     println!("Enter Department\n> Front\n> Back\n");
@@ -121,8 +69,8 @@ fn main() {
 
                     match stdin().read_line(&mut input) {
                         Ok(_) => match input.as_str().trim() {
-                            "Front" => list_of_employees(&mut map, "Front"),
-                            "Back" => list_of_employees(&mut map, "Back"),
+                            "Front" => list_of_employees(&employee_list, "Front"),
+                            "Back" => list_of_employees(&employee_list, "Back"),
                             _ => {
                                 println!("No department named {}", input);
                                 continue;
@@ -135,7 +83,7 @@ fn main() {
                     }
                     break;
                 },
-                "c" => add_employee(&mut map, &mut pressed_x),
+                "c" => add_employee(&mut employee_list, &mut pressed_x),
                 _ => println!("{}", &enter_text),
             },
             Err(_) => {
@@ -147,5 +95,153 @@ fn main() {
             break;
         }
     }
-    println!("Map length after {}", map.len());
+    println!("Map length after {}", employee_list.len());
+}
+
+fn add_employee(employee_list: &mut Vec<Employee>, pressed_x: &mut bool) {
+    while !*pressed_x {
+        let mut input: String = String::new();
+        let mut name: String = String::new();
+        let department: Department;
+        let salary: u16;
+        let date: NaiveDate;
+        input.clear();
+
+        println!("Type Name: Sam");
+        match stdin().read_line(&mut input) {
+            Ok(_) => {
+                name = input.trim().to_string().clone();
+                println!("Employee Name {}", &name,);
+            }
+            Err(_) => {
+                println!("Invalid Name");
+                continue;
+            }
+        };
+        loop {
+            input.clear();
+            println!("Enter a Department (Back/Front): Front");
+            match stdin().read_line(&mut input) {
+                Ok(_) => {
+                    match input.as_str().trim() {
+                        "Front" => department = Department::Front,
+
+                        "Back" => department = Department::Back,
+                        _ => {
+                            println!("Invalid Department: {}", &input);
+                            continue;
+                        }
+                    }
+                    break;
+                }
+                Err(_) => {
+                    println!("Invalid Department: {}", &input);
+                    continue;
+                }
+            };
+        }
+        loop {
+            input.clear();
+            println!("Enter a Salary: 2000");
+            match stdin().read_line(&mut input) {
+                Ok(_) => {
+                    if let Ok(number) = input.trim().parse::<u16>() {
+                        salary = number;
+
+                        break;
+                    } else {
+                        continue;
+                    }
+                }
+                Err(_) => continue,
+            }
+        }
+        loop {
+            input.clear();
+            println!("Enter Employment Date: 2024.01.31");
+            match stdin().read_line(&mut input) {
+                Ok(_) => {
+                    let vect: Vec<&str> = input.trim().split('.').collect();
+                    if let Some(valid) = NaiveDate::from_ymd_opt(
+                        vect[0].parse::<i32>().unwrap(),
+                        vect[1].parse::<u32>().unwrap(),
+                        vect[2].parse::<u32>().unwrap(),
+                    ) {
+                        date = valid;
+                        break;
+                    } else {
+                        println!("Invalid date! {}", &input);
+                        continue;
+                    }
+                }
+                Err(_) => continue,
+            }
+        }
+        employee_list.push(Employee {
+            name: name,
+            department: department,
+            salary: salary,
+            employment_date: date,
+        });
+        println!(
+            "\n\nEmpolyee added: {} {} {} {}",
+            &employee_list.last().unwrap().name,
+            &employee_list.last().unwrap().department,
+            &employee_list.last().unwrap().salary,
+            &employee_list.last().unwrap().employment_date,
+        );
+        break;
+    }
+}
+
+fn list_of_employees(employee_list: &Vec<Employee>, department: &str) {
+    let mut t: Vec<(String, String, String, String)> = Vec::new();
+
+    for employee in employee_list {
+        t.push((
+            employee.name.clone(),
+            match employee.department {
+                Department::Front => "Front".to_string(),
+                Department::Back => "Back".to_string(),
+            },
+            employee.salary.to_string(),
+            employee.employment_date.to_string(),
+        ));
+    }
+    t.sort();
+    println!("");
+    println!("------------------");
+    match department {
+        "All Departments" => {
+            for (name, department, salary, empolyment_date) in t {
+                println!(
+                    "> {} | {} | {} Eur | {}",
+                    name, department, salary, empolyment_date
+                );
+            }
+        }
+        "Front" => {
+            for (name, department, salary, empolyment_date) in t {
+                if department == "Front" {
+                    println!(
+                        "> {} | {} | {} Eur | {}",
+                        name, department, salary, empolyment_date
+                    );
+                }
+            }
+        }
+        "Back" => {
+            for (name, department, salary, empolyment_date) in t {
+                if department == "Back" {
+                    println!(
+                        "> {} | {} | {} Eur | {}",
+                        name, department, salary, empolyment_date
+                    );
+                }
+            }
+        }
+        _ => {}
+    }
+    println!("------------------");
+    println!("");
 }
