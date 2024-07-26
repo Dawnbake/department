@@ -12,7 +12,7 @@ fn add_employee(map: &mut HashMap<String, Department>, pressed_x: &mut bool) {
         let mut input = String::new();
         let mut action = String::new();
         let mut name = String::new();
-        let mut department: Department;
+        let department: Department;
         match stdin().read_line(&mut input) {
             Ok(_) => {
                 println!("Your input was {}", &input);
