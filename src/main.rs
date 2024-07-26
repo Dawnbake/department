@@ -27,6 +27,7 @@ fn main() {
     let mut employee_list: Vec<Employee> = Vec::new();
     let mut input = String::new();
 
+    // Mock Data
     employee_list.push(Employee {
         name: "Lucas".to_string(),
         department: Department::Back,
@@ -43,7 +44,25 @@ fn main() {
         name: "Mark".to_string(),
         department: Department::Front,
         salary: 1800,
-        employment_date: NaiveDate::from_ymd_opt(2022, 1, 31).unwrap(),
+        employment_date: NaiveDate::from_ymd_opt(2022, 2, 27).unwrap(),
+    });
+    employee_list.push(Employee {
+        name: "Darn".to_string(),
+        department: Department::Back,
+        salary: 1100,
+        employment_date: NaiveDate::from_ymd_opt(2022, 1, 1).unwrap(),
+    });
+    employee_list.push(Employee {
+        name: "Cus".to_string(),
+        department: Department::Back,
+        salary: 2500,
+        employment_date: NaiveDate::from_ymd_opt(2020, 3, 9).unwrap(),
+    });
+    employee_list.push(Employee {
+        name: "Bonu".to_string(),
+        department: Department::Front,
+        salary: 3000,
+        employment_date: NaiveDate::from_ymd_opt(2021, 4, 21).unwrap(),
     });
 
     println!("Employees count before {}", employee_list.len());
@@ -83,7 +102,7 @@ fn main() {
                     }
                     break;
                 },
-                "c" => add_employee(&mut employee_list, &mut pressed_x),
+                "c" => add_employee(&mut employee_list),
                 _ => println!("{}", &enter_text),
             },
             Err(_) => {
@@ -98,8 +117,8 @@ fn main() {
     println!("Map length after {}", employee_list.len());
 }
 
-fn add_employee(employee_list: &mut Vec<Employee>, pressed_x: &mut bool) {
-    while !*pressed_x {
+fn add_employee(employee_list: &mut Vec<Employee>) {
+    loop {
         let mut input: String = String::new();
         let mut name: String = String::new();
         let department: Department;
@@ -196,7 +215,15 @@ fn add_employee(employee_list: &mut Vec<Employee>, pressed_x: &mut bool) {
 
 fn list_of_employees(employee_list: &Vec<Employee>, department: &str) {
     let mut t: Vec<(String, String, String, String)> = Vec::new();
+    let mut input: String = String::new();
+    let mut sort_type: String = "Name".to_string();
 
+    let enter_text = "\nEnter
+>'x' to go back,
+>'z' to sort by name or 'Z' for reverse order,
+>'d' to sort by department or 'D' for reverse order,
+>'c' to sort by salary or 'C' for reverse order,
+>'v' to sort by employment date or 'V' for reverse order";
     for employee in employee_list {
         t.push((
             employee.name.clone(),
@@ -207,41 +234,140 @@ fn list_of_employees(employee_list: &Vec<Employee>, department: &str) {
             employee.salary.to_string(),
             employee.employment_date.to_string(),
         ));
+        t.sort();
     }
-    t.sort();
-    println!("");
-    println!("------------------");
-    match department {
-        "All Departments" => {
-            for (name, department, salary, empolyment_date) in t {
-                println!(
-                    "> {} | {} | {} Eur | {}",
-                    name, department, salary, empolyment_date
-                );
-            }
-        }
-        "Front" => {
-            for (name, department, salary, empolyment_date) in t {
-                if department == "Front" {
+    loop {
+        input.clear();
+
+        println!("\n\n\n\n");
+        println!("Sorted by {}", sort_type);
+        println!("------------------");
+        match department {
+            "All Departments" => {
+                for (name, department, salary, empolyment_date) in &t {
                     println!(
                         "> {} | {} | {} Eur | {}",
                         name, department, salary, empolyment_date
                     );
                 }
             }
-        }
-        "Back" => {
-            for (name, department, salary, empolyment_date) in t {
-                if department == "Back" {
-                    println!(
-                        "> {} | {} | {} Eur | {}",
-                        name, department, salary, empolyment_date
-                    );
+            "Front" => {
+                for (name, department, salary, empolyment_date) in &t {
+                    if department == "Front" {
+                        println!(
+                            "> {} | {} | {} Eur | {}",
+                            name, department, salary, empolyment_date
+                        );
+                    }
                 }
             }
+            "Back" => {
+                for (name, department, salary, empolyment_date) in &t {
+                    if department == "Back" {
+                        println!(
+                            "> {} | {} | {} Eur | {}",
+                            name, department, salary, empolyment_date
+                        );
+                    }
+                }
+            }
+            _ => {}
         }
-        _ => {}
+        println!("------------------");
+        println!("");
+        println!("{}", &enter_text);
+        match stdin().read_line(&mut input) {
+            Ok(_) => match input.as_str().trim() {
+                "x" => {
+                    break;
+                }
+                "z" => {
+                    sort_type = "Name".to_string();
+                    t.sort();
+                    continue;
+                }
+                "Z" => {
+                    sort_type = "Name".to_string();
+                    t.sort_by(
+                        |a: &(String, String, String, String),
+                         b: &(String, String, String, String)| {
+                            b.0.cmp(&a.0)
+                        },
+                    );
+                    continue;
+                }
+                "c" => {
+                    sort_type = "Salary".to_string();
+                    t.sort_by(
+                        |a: &(String, String, String, String),
+                         b: &(String, String, String, String)| {
+                            b.2.cmp(&a.2)
+                        },
+                    );
+                    continue;
+                }
+                "C" => {
+                    sort_type = "Salary".to_string();
+                    t.sort_by(
+                        |a: &(String, String, String, String),
+                         b: &(String, String, String, String)| {
+                            a.2.cmp(&b.2)
+                        },
+                    );
+                    continue;
+                }
+                "v" => {
+                    sort_type = "Empployment Date".to_string();
+                    t.sort_by(
+                        |a: &(String, String, String, String),
+                         b: &(String, String, String, String)| {
+                            a.3.cmp(&b.3)
+                        },
+                    );
+                    continue;
+                }
+                "V" => {
+                    sort_type = "Empployment Date".to_string();
+                    t.sort_by(
+                        |a: &(String, String, String, String),
+                         b: &(String, String, String, String)| {
+                            b.3.cmp(&a.3)
+                        },
+                    );
+                    continue;
+                }
+                "d" => {
+                    sort_type = "Department".to_string();
+                    t.sort_by(
+                        |a: &(String, String, String, String),
+                         b: &(String, String, String, String)| {
+                            b.1.cmp(&a.1)
+                        },
+                    );
+                    continue;
+                }
+                "D" => {
+                    sort_type = "Department".to_string();
+                    t.sort_by(
+                        |a: &(String, String, String, String),
+                         b: &(String, String, String, String)| {
+                            a.1.cmp(&b.1)
+                        },
+                    );
+                    continue;
+                }
+                _ => {
+                    println!(
+                        "Please enter a letter from the list below.
+                    {}",
+                        enter_text
+                    )
+                }
+            },
+            Err(_) => {
+                println!("Something went wrong reading the input");
+                continue;
+            }
+        }
     }
-    println!("------------------");
-    println!("");
 }
